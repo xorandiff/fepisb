@@ -96,7 +96,7 @@ GET /github/{username}/repos
    ```json
    {
      "status": 429,
-     "message": "GitHub API rate limit exceeded. Try setting GITHUB_TOKEN as an environment variable."
+     "message": "GitHub API rate limit exceeded."
    }
    ```
 
