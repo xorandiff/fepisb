@@ -13,15 +13,11 @@ A minimal Kotlin + Spring Boot 3.5 REST API to list all **non-fork** GitHub repo
    git clone https://github.com/yourusername/fepisb.git
    cd fepisb
    ```
-2. (Optional) Export your GitHub token:
-   ```bash
-   export GITHUB_TOKEN=your_personal_access_token
-   ```
-3. Build and run:
+2. Build and run:
    ```bash
    ./gradlew bootRun
    ```
-4. The app will start on **`http://localhost:8080`**
+3. The app will start on **`http://localhost:8080`**
 
 ---
 
