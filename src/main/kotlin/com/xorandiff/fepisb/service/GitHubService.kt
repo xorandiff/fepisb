@@ -1,5 +1,6 @@
 package com.xorandiff.fepisb.service
 
+import com.xorandiff.fepisb.exception.RateLimitExceededException
 import com.xorandiff.fepisb.exception.UsernameNotFoundException
 import com.xorandiff.fepisb.model.Branch
 import com.xorandiff.fepisb.model.RepoResponse
@@ -23,8 +24,14 @@ class GitHubService(private val restTemplate: RestTemplate) {
                 null,
                 repoListType
             ).body ?: emptyList()
-        } catch (ex: HttpClientErrorException.NotFound) {
-            throw UsernameNotFoundException("GitHub user '$username' not found")
+        } catch (ex: HttpClientErrorException) {
+            when (ex.statusCode.value()) {
+                404 -> throw UsernameNotFoundException("GitHub user '$username' not found")
+                403 -> {
+                    throw RateLimitExceededException("GitHub API rate limit exceeded.")
+                }
+                else -> throw ex
+            }
         }
 
         return repos
@@ -33,17 +40,26 @@ class GitHubService(private val restTemplate: RestTemplate) {
                 val name = repo["name"] as String
                 val ownerLogin = (repo["owner"] as Map<*, *>)["login"] as String
                 val branches = fetchBranches(ownerLogin, name)
+                
                 RepoResponse(name, ownerLogin, branches)
             }
     }
 
     private fun fetchBranches(owner: String, repo: String): List<Branch> {
-        val branches: List<Map<String, Any>> = restTemplate.exchange(
-            "https://api.github.com/repos/$owner/$repo/branches",
-            HttpMethod.GET,
-            null,
-            branchListType
-        ).body ?: emptyList()
+        val branches: List<Map<String, Any>> = try {
+            restTemplate.exchange(
+                "https://api.github.com/repos/$owner/$repo/branches",
+                HttpMethod.GET,
+                null,
+                branchListType
+            ).body ?: emptyList()
+        } catch (ex: HttpClientErrorException) {
+            if (ex.statusCode.value() == 403) {
+                throw RateLimitExceededException("GitHub API rate limit exceeded when fetching branches for $owner/$repo.")
+            }
+            
+            throw ex
+        }
 
         return branches.map { b ->
             val branchName = b["name"] as String

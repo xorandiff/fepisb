@@ -17,12 +17,14 @@ class GitHubController(private val gitHubService: GitHubService) {
     fun getUserRepos(@PathVariable username: String): ResponseEntity<Any> =
         try {
             val repos = gitHubService.getRepos(username)
+            
             ResponseEntity.ok(repos)
         } catch (ex: UsernameNotFoundException) {
             val error = mapOf(
                 "status" to HttpStatus.NOT_FOUND.value(),
                 "message" to ex.message
             )
+            
             ResponseEntity.status(HttpStatus.NOT_FOUND).body(error)
         }
 }
