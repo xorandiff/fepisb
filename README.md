@@ -4,6 +4,8 @@
 
 A minimal Kotlin + Spring Boot 3.5 REST API to list all **non-fork** GitHub repositories for a user, including each branch’s name and last commit SHA.
 
+---
+
 ## Running the Application
 
 1. Clone the repository:
@@ -107,3 +109,4 @@ Run the integration test which verifies the happy path against the real GitHub A
 ```bash
 ./gradlew test
 ```
+
